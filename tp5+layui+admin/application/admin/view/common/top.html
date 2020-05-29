@@ -1,0 +1,25 @@
+<div class="layui-tab" lay-filter="toptab" lay-allowClose="true" style="margin: 0px;background: #fff">
+    <ul class="layui-tab-title" style="margin-bottom: 10px">
+
+        <li class="layui-this" lay-id="System" >首页</li>
+    </ul>
+    <div class="layui-tab-content" style="padding:0px " >
+        <div class="layui-tab-item layui-show">
+            <!--设置默认加载iframe-->
+            <iframe class="myiframe" scrolling="no" frameborder="0" height="100%" width="100%"  src="admin/System" ></iframe>
+
+        </div>
+    </div>
+</div>
+<style>
+/*.layui-tab-item,.layui-tab-content{*/
+    /*height: 100%;*/
+/*}*/
+/*设置第一个不可关闭*/
+.layui-tab-title li:first-child .layui-tab-close{
+    display:none!important;
+
+
+}
+
+</style>

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    {include file="common/css" /}
+    <style>
+        /*.layui-form-pane .layui-form-label{*/
+            /*width: auto;*/
+        /*}*/
+        /*.layui-form-item .layui-input-inline{*/
+            /*width: 100px;*/
+
+        /*}*/
+    </style>
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body >
+<!--搜索工具-->
+<div class="demoTable" style="padding: 0px 20px">
+    <div class="layui-form layui-form-pane">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label" style="width: auto">姓名</label>
+            <div class="layui-input-inline" style="width: 120px">
+                <input type="text" class="layui-input " name="name" id="uname" autocomplete="off" placeholder="姓名">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label" style="width: auto">用户名</label>
+            <div class="layui-input-inline" style="width: 120px">
+                <input  type="text" class="layui-input" name="username" id="username" autocomplete="off" placeholder="用户名">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label" style="width: auto">手机号</label>
+            <div class="layui-input-inline" style="width: 120px">
+                <input type="number" class="layui-input" name="phone" id="phone" autocomplete="off" placeholder="电话">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <button class="layui-btn" data-type="reload"><i class="layui-icon">&#xe615;</i> 搜索</button>
+        </div>
+    </div>
+    </div>
+
+
+</div>
+<!--头部工具-->
+<script type="text/html" id="toolAdminDemo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="addfun"><i class="layui-icon">&#xe608;</i>添加</button>
+    </div>
+</script>
+
+<!--右侧栏操作按钮工具-->
+<script type="text/html" id="barAdminDemo">
+
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script type="text/html" id="rank">
+    {{d.LAY_TABLE_INDEX+1}}
+</script>
+<!--数据表格-->
+<table class="layui-hide" id="LAY_table_user" lay-filter="listTable"></table>
+
+<div id="test1"></div>
+
+
+<!--添加-->
+<div id="addpen" class="" style="padding:20px;display: none;">
+    <form class="layui-form" action="" lay-filter="example" id="addform">
+        <input type="hidden" name="id" lay-verify="id">
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-required">所属角色</label>
+            <div class="layui-input-block">
+                <select name="role_id" required id="rolelist" lay-verify="role_id" lay-search="">
+
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-required">用户名</label>
+            <div class="layui-input-block">
+                <input type="text" name="username" id="dateusername"  lay-verify="username" autocomplete="off" placeholder="请输入用户名" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-required">设置密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="password" lay-verify="password" placeholder="请设置登录密码" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-required">确认密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="password2" lay-verify="password2" placeholder="请在次输入密码" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label layui-required">姓名</label>
+                <div class="layui-input-inline">
+                    <input type="tel" name="title" lay-verify="title"  autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label layui-required">手机号</label>
+                <div class="layui-input-inline">
+                    <input type="tel" name="phone"  lay-verify="required|phone" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-block">
+                <input type="checkbox" checked="" name="status" lay-skin="switch" lay-filter="status" lay-text="启用|关闭">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="smbitform">确定</button>
+            </div>
+        </div>
+    </form>
+</div>
+{include file="common/js" /}
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+    var open_add = "";
+    var add_or_edit = true;
+    var page_ = 1;
+    layui.use(['table','form', 'layedit', 'laydate','laypage'], function(){
+        var table = layui.table,
+            form = layui.form,
+            layer = layui.layer ,
+            layedit = layui.layedit ,
+            laydate = layui.laydate;
+            laypage = layui.laypage;
+        var counts_ = 0;
+        var data_ = [];
+        //方法级渲染
+       var tableIns = table.render({
+            id: 'testReload',
+            elem: '#LAY_table_user',
+            url: '/admin/admin/getlist',
+            toolbar: '#toolAdminDemo', //开启头部工具栏，并为其绑定左侧模板
+            defaultToolbar: [
+                { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+                    title: '刷新',
+                    layEvent: 'refresh',
+                    icon: 'layui-icon-refresh'
+                },
+                'filter',
+                'exports',
+                'print'
+
+            ],
+            page:true,
+            height: 'full-80',//高度最大化
+            limit:10,
+            parseData:[],
+            where:{
+                title:'',
+                username:'',
+                phone:''
+            },
+           done: function(res, curr, count){
+                data_ = res.data;
+                if(data_.length == 0 && count !== 0){
+                    lodinlist(curr-1,{
+                        title: '',
+                        username: '',
+                        phone:''
+                    })
+                    page_ = curr-1;
+                }else{
+
+                    page_ = curr;
+                }
+               counts_ = count;
+           },
+           title:'管理员',
+            cols: [[ //表头
+                { field: 'rank', title: '序号', width: 80,  fixed: 'left', templet: '#rank' },
+                {field: 'username', title: '用户名'},
+                {field: 'title',title: '名称'},
+                {field: 'role_title', title: '类型'},
+                {field: 'title', title: '姓名'},
+                {field: 'phone', title: '电话'},
+                {fixed: 'right', title:'操作', toolbar: '#barAdminDemo', width:150}
+            ]]
+        });
+
+        var $ = layui.$, active = {
+            reload: function(){
+                //执行重载
+                lodinlist(1, {
+                    title: $('#uname').val(),
+                    username: $('#username').val(),
+                    phone: $('#phone').val()
+                });
+            }
+        };
+        //数据加载处理
+        function getYmenu(role_id) {
+            $.ajax({
+                url:'admin/getRole',
+                method:'get',
+                data:{},
+                async: false,
+                dataType:'JSON',
+                success:function(res){
+                    //提示层
+                    if(res.code == 20000){
+                        var menlist = res.data;
+                        for(var i in menlist){
+                            $("#rolelist").append(' <option value="'+menlist[i].id+'">'+menlist[i].title+'</option>')
+                        }
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        }
+        //数据加载处理
+        function lodinlist(curr,where) {
+            table.reload('testReload', {
+                page: {
+                    curr: curr //重新从第 curr 页开始
+                },
+                where:where
+            }, 'data');
+        }
+
+        $('.demoTable .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        //监听工具条
+        table.on('tool(listTable)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'detail'){
+//                layer.msg('ID：'+ data.id + ' 的查看操作');
+            } else if(obj.event === 'del'){
+                layer.confirm('你确定删除该管理员吗',{
+                    icon:3,
+                    title: '删除提示'
+                },function (index) {
+                    dele(data,obj);
+                    layer.close(index);
+                });
+            } else if(obj.event === 'edit'){
+                editget(data);
+            }
+
+        });
+        //修改事件处理
+        function editget(data) {
+            add_or_edit = false;
+            $.ajax({
+                url:'admin/getinfo',
+                method:'get',
+                data:{id:data.id},
+                dataType:'JSON',
+                success:function(res){
+                    //提示层
+                    if(res.code == 20000){
+                        form.val('example', res.data);
+                        openwin('修改',res.data.role_id);
+                        $('#addform input[name=id]').val(res.data.id);
+                        $('#dateusername').attr('disabled',true);
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        }
+        //打开窗口处理
+        getYmenu(0);
+        form.render('select');
+        function openwin(title,role_id) {
+            $('#addform input[name=role_id]').val(role_id);
+
+            open_add = layer.open({
+                title:title,
+                type:1,
+                area: ['80%'],
+                fixed: false, //不固定
+                content: $("#addpen"),
+                cancel: function(index, layero){
+                    cancel_()
+                }
+            });
+        }
+        //关闭窗口处理
+        function cancel_(){
+            layer.close(open_add);
+            $("#addform")[0].reset();
+            $('#addform input[name=id]').val("");
+            form.render();
+//            $("#rolelist").html("");
+        }
+
+        //工具栏事件(添加、刷新)
+        table.on('toolbar(listTable)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch(obj.event){
+                case 'addfun':
+                    add_or_edit = true;
+                    openwin('添加管理员',null);
+                    $('#addform input[name=id]').val("");
+                    $('#dateusername').attr('disabled',false);
+                    break;
+                //自定义头工具栏右侧图标 - 提示
+                case 'refresh':
+                    //执行重载
+                    lodinlist(1,{
+                        title: '',
+                        username: '',
+                        phone:''
+                    })
+                    break;
+            };
+        });
+
+        //自定义验证规则
+        form.verify({
+            title: function(value){
+                if(value.length < 2){
+                    return '姓名至少得2个字符啊';
+                }
+            },
+            role_id: function(value){
+                if(!value){
+                    return '请选择角色所属';
+                }
+            },
+            password: function (value) {
+                if(add_or_edit == true){
+                    if(!value){
+                        return '登录密码不能为空';
+                    }else {
+                        var reg  = /^[\S]{6,12}$/;
+                        if(!reg.test(value)){
+                            return '密码必须6到12位，且不能出现空格';
+                        }
+                    }
+                }
+            },
+            password2: function(value){
+                if(add_or_edit == true){
+                    if(!value){
+                        return '请再次确认密码';
+                    }else {
+                        if($('input[name=password]').val() !== value)
+                            return '两次密码输入不一致！';
+                    }
+                }else {
+                    if($('input[name=password]').val() || value){
+
+                        if($('input[name=password]').val() !== value)
+                            return '两次密码输入不一致！';
+                    }
+                }
+            },
+            username: function(value){
+                if(value.length < 3){
+                    return '用户名最少3个字符';
+                }
+            }
+        });
+
+        //监听提交、修改
+        form.on('submit(smbitform)', function(data){
+            var date = data.field;
+            if(date.password || date.password2){
+                date.password = $.md5( date.password);
+                date.password2 = $.md5( date.password2);
+            }
+            date.status = date.status == undefined ? 0 : 1;
+
+            if(add_or_edit == true){
+                insta(date)
+            }else {
+                edit(date)
+            }
+
+            return false
+        });
+        //添加方法
+        function insta(date) {
+            $.ajax({
+                url:'admin/add',
+                method:'post',
+                data:date,
+                dataType:'JSON',
+                success:function(res){
+                    //提示层
+                    if(res.code == 20000){
+                        cancel_()
+                        layer.msg(res.msg);
+                        //执行重载
+                        lodinlist(1, {
+                            title: '',
+                            username: '',
+                            phone: ''
+                        });
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        }
+        //修改方法
+        function edit(date) {
+            $.ajax({
+                url:'admin/edit',
+                method:'post',
+                data:date,
+                dataType:'JSON',
+                success:function(res){
+                    //提示层
+                    if(res.code == 20000){
+                        cancel_()
+                        layer.msg(res.msg);
+                        //执行重载
+                        lodinlist(page_, {
+                            title: '',
+                            username: '',
+                            phone: ''
+                        });
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        }
+
+        function dele(date,obj) {
+
+
+            $.ajax({
+                url:'admin/dele',
+                method:'post',
+                data:{id:date.id},
+                dataType:'JSON',
+                success:function(res){
+                    if(res.code == 20000){
+                        layer.msg(res.msg);
+
+                        //执行重载
+                        lodinlist( page_, {
+                            title: '',
+                            username: '',
+                            phone: ''
+                        });
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        }
+    })
+</script>
+
+</body>
+</html>

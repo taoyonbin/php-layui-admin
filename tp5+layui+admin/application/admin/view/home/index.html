@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_1794739_ax2yl14umge.css">
+    <style>
+        /*.layui-card-header i,.layui-card-header span{*/
+            /*font-size: 20px;*/
+        /*}*/
+        /*.layui-card-header i{*/
+            /*font-size: 30px;*/
+        /*}*/
+        .home-list{
+            display: inline-block
+        }
+        .home-list li{
+            float: left;
+            width: 150px;
+            margin: 15px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+
+        }
+        .home-list li i{
+            font-size: 55px;
+            float: left;
+            color: #bdbaba;
+            padding-right: 10px;
+            transition: color .3s;
+            /*animation:  1s 3s infinite;*/
+            /*-moz-animation: myfirst 5s;	!* Firefox *!*/
+            /*-webkit-animation: myfirst 5s;	!* Safari 和 Chrome *!*/
+            /*-o-animation: myfirst 5s;	!* Opera *!*/
+
+        }
+        .home-list li~div{
+            float: left;
+            height: 40px;
+        }
+        .home-list li  span{
+            display: block;
+            font-size: 18px;
+            padding-left: 10px;
+            color: #777;
+        }
+        .home-list li  .number{
+            font-size: 30px;
+            color: #a6a6a6;
+            /*animation: myfirst 5s;*/
+            transition: color .3s;
+            /*-moz-animation: myfirst 5s;	!* Firefox *!*/
+            /*-webkit-animation: myfirst 5s;	!* Safari 和 Chrome *!*/
+            /*-o-animation: myfirst 5s;	!* Opera *!*/
+        }
+
+        .home-list li:hover i,.home-list li:hover .number{
+            color: #61a5d1;
+
+        }
+
+    </style>
+    {include file="common/css" /}
+</head>
+<body>
+
+<div style="display: block; background-color: #e7e7e7;">
+    <ul class="home-list">
+        <!--<li>-->
+            <!--<i class="iconfont icon-xuncha"></i>-->
+           <!--<div>-->
+               <!--<span class="number">-->
+                <!--20-->
+                <!--</span>-->
+               <!--<span class="title">-->
+                <!--巡查人话-->
+                <!--</span>-->
+           <!--</div>-->
+
+        <!--</li>-->
+    </ul>
+</div>
+{include file="common/js" /}
+<script>
+
+    layui.use(['form'], function(){
+
+        $.ajax({
+            url:'home/getNumber',
+            method:'post',
+            data:{},
+            dataType:'JSON',
+            success:function(res){
+                //提示层
+                if(res.code == 20000){
+                    apend_li(res.data)
+                }else{
+                    layer.msg(res.msg,{icon: 2});
+                }
+            },
+            error:function (data) {
+
+            }
+        }) ;
+
+        function apend_li(list) {
+            for(var i in list){
+                $(".home-list").append('<li>' +
+                    '            <i class="iconfont '+list[i].icon +'"></i>' +
+                    '           <div>' +
+                    '               <span class="number">' +list[i].number +'</span>' +
+                    '               <span class="title">' +list[i].title +'</span>' +
+                    '           </div>' +
+                    '        </li>');
+            }
+        }
+
+        $('.number').each(function () {
+            $(this).prop('Counter',0).animate({
+                Counter: $(this).text()
+            }, {
+                duration: 500,
+                easing: 'swing',
+                step: function (now) {
+                    $(this).text(Math.ceil(now));
+                }
+            });
+        });
+
+
+
+    });
+</script>
+</body>
+</html>

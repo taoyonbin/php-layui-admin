@@ -1,0 +1,148 @@
+{include file="common/css" /}
+<style>
+    .layui-form-pane .layui-form-label{
+        width: 130px;
+    }
+    .layui-form-pane .layui-input-block{
+        margin-left: 130px;
+    }
+    .layui-form-item{
+        margin-bottom: 5px;
+    }
+</style>
+<div  style="padding: 20px; background-color: #F2F2F2;">
+
+    <div class="layui-row layui-col-space15 ">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">系统变量</div>
+                <div class="layui-card-body layui-form layui-form-pane">
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">thinkphp版本</label>
+                            <div class="layui-input-block">
+                                <input type="text" disabled value="{$thinkphp.THINK_VERSION}" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">接口加密字符</label>
+                            <div class="layui-input-block">
+
+                                <input type="text" disabled value="{$data.token_api}" class="layui-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">图片端口地址</label>
+                        <div class="layui-input-block">
+                            <input type="text" disabled value="{$data.img_ip}" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">图片存放目录</label>
+                        <div class="layui-input-block">
+
+                            <input type="text" disabled value="{$data.upload_admin_path}" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="layui-row layui-col-space15 ">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">Xampp</div>
+                <div class="layui-card-body layui-form layui-form-pane">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">Xampp版本</label>
+                        <div class="layui-input-block">
+                            <input type="text" disabled value="{$thinkphp.APACHE_VERSION}" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">端口</label>
+                            <div class="layui-input-block">
+                                <input type="text" disabled value="{$thinkphp.APACHE_SERVER_PORT}" class="layui-input">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!--数据库-->
+    <div class="layui-row layui-col-space15 ">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">数据库</div>
+                <div class="layui-card-body layui-form layui-form-pane">
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">Mysql版本</label>
+                            <div class="layui-input-block">
+                                <input type="text" disabled value="{$thinkphp.MYSQL_VERSION}" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">数据库名字</label>
+                            <div class="layui-input-block">
+                                <input type="text" disabled value="{$data.database.database}" class="layui-input">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">地址</label>
+                            <div class="layui-input-block">
+                                <input type="text" disabled value="{$data.database.hostname}" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">端口</label>
+                            <div class="layui-input-block">
+                                <input type="text" disabled value="{$data.database.hostport}" class="layui-input">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">账号</label>
+                            <div class="layui-input-block">
+                                <input type="text" disabled value="{$data.database.username}" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">密码</label>
+                            <div class="layui-input-block">
+                                <input type="text" disabled value="{$data.database.password}" class="layui-input">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">前缀</label>
+                            <div class="layui-input-block">
+                                <input type="text" disabled value="{$data.database.prefix}" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">类型</label>
+                            <div class="layui-input-block">
+                                <input type="text" disabled value="{$data.database.type}" class="layui-input">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{include file="common/js" /}

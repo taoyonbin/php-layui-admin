@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    {include file="common/css" /}
+    <style>
+        /*.layui-form-pane .layui-form-label{*/
+        /*width: auto;*/
+        /*}*/
+        /*.layui-form-item .layui-input-inline{*/
+        /*width: 100px;*/
+
+        /*}*/
+        .layui-table, .layui-table-view{
+
+        }
+    </style>
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body >
+<div style="">
+
+    <!--头部工具-->
+    <script type="text/html" id="toolDemo">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-sm" lay-event="addfun"><i class="layui-icon">&#xe608;</i>添加角色</button>
+        </div>
+    </script>
+
+    <!--右侧栏操作按钮工具-->
+    <script type="text/html" id="barDemo">
+
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
+    <script type="text/html" id="rank">
+        {{d.LAY_TABLE_INDEX+1}}
+    </script>
+    <table class="layui-hide" id="talelist" lay-filter="listTable"></table>
+
+    <!--添加-->
+    <div id="addpen" class="" style="padding:20px;display: none;">
+        <form class="layui-form" action="" lay-filter="example" id="addform">
+            <input type="hidden" name="id" lay-verify="id">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label layui-required">角色名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="title"  required   lay-verify="title" autocomplete="off" placeholder="角色名称" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <input type="text" name="content"     lay-verify="content" autocomplete="off" placeholder="备注" class="layui-input">
+                </div>
+            </div>
+
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">权限</label>
+                <div class="layui-input-block">
+                    <div id="test12" class="demo-tree demo-tree-box" style=" height: 300px; overflow: scroll;"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" checked="" name="status" lay-skin="switch" lay-filter="status" lay-text="启用|关闭">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="submit" class="layui-btn" lay-submit="" lay-filter="smbitform">确定</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{include file="common/js" /}
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+    var open_add = "";
+    var add_or_edit = true;
+    var page_ = 1;
+    var chdate_ = [];
+    layui.use(['table','form','tree','util','layedit', 'laydate','laypage','element'], function(){
+        var table = layui.table,
+            form = layui.form,
+            layer = layui.layer ,
+            layedit = layui.layedit ,
+            tree = layui.tree ,
+            util = layui.util ,
+            laydate = layui.laydate;
+        laypage = layui.laypage;
+        var element = layui.element;
+
+
+        var counts_ = 0;
+        var data_ = [];
+        var menu_ = [];
+        var $ = layui.$, active = {
+            reload: function(){
+                //执行重载
+                lodinlist(1, {});
+            }
+        };
+        //方法级渲染
+        var tableIns = table.render({
+            id: 'testReload',
+            elem: '#talelist',
+            url: 'Role/getlist',
+            toolbar: '#toolDemo', //开启头部工具栏，并为其绑定左侧模板
+            defaultToolbar: [
+                { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+                    title: '刷新',
+                    layEvent: 'refresh',
+                    icon: 'layui-icon-refresh'
+                },
+            ],
+            page:true,
+            height: 'full-20',//高度最大化
+            limit:10,
+            parseData:[],
+            done: function(res, curr, count){
+                data_ = res.data;
+                if(data_.length == 0 && count !== 0){
+                    lodinlist(curr-1,{})
+                    page_ = curr-1;
+                }else{
+
+                    page_ = curr;
+                }
+                counts_ = count;
+            },
+            cols: [[ //表头
+                { field: 'rank', title: '序号', width: 80, fixed: 'left', templet: '#rank' }
+                ,{field:'title', minWidth: 100, title: '角色名称'}
+                ,{field:'content', minWidth: 100, title: '描述'}
+                ,{fixed: 'right', title:'操作', toolbar: '#barDemo', width:150}
+            ]]
+        });
+        getYmenu();
+        //数据加载处理
+        function getYmenu() {
+            $.ajax({
+                url:'Role/getAllrole',
+                method:'get',
+                data:{},
+                async: false,
+                dataType:'JSON',
+                success:function(res){
+                    //提示层
+                    if(res.code == 20000){
+                        menu_ = res.data;
+
+
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        }
+
+//基本演示
+        tree.render({
+            elem: '#test12'
+            ,url:"Role/getAllrole"
+            ,data: menu_
+            ,showCheckbox: true  //是否显示复选框
+            ,id: 'roletree'
+            ,isJump: true //是否允许点击节点时弹出新窗口跳转
+            ,click: function(obj){
+                var data = obj.data;  //获取当前点击的节点数据
+                layer.msg('状态：'+ obj.state + '<br>节点数据：' + JSON.stringify(data));
+            }
+        });
+
+
+
+//        //开启节点操作图标
+
+        //数据加载处理
+        function lodinlist(curr,where) {
+            table.reload('testReload', {
+                page: {
+                    curr: curr //重新从第 curr 页开始
+                },
+                where:where
+            }, 'data');
+        }
+
+
+
+        $('.demoTable .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        //监听工具条
+        table.on('tool(listTable)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'detail'){
+//                layer.msg('ID：'+ data.id + ' 的查看操作');
+            } else if(obj.event === 'del'){
+                layer.confirm('你确定删除该角色吗',{
+                    icon:3,
+                    title: '删除提示'
+                },function (index) {
+                    dele(data,obj);
+
+                    layer.close(index);
+                });
+            } else if(obj.event === 'edit'){
+                editget(data);
+            }
+
+        });
+        //修改事件处理
+        function editget(data) {
+            add_or_edit = false;
+            $.ajax({
+                url:'Role/getinfo',
+                method:'get',
+                data:{id:data.id},
+                dataType:'JSON',
+                success:function(res){
+                    //提示层
+                    if(res.code == 20000){
+                        form.val('example', res.data);
+                        openwin('修改'+res.data.title);
+                        tree.setChecked('roletree', res.data.role); //勾选指定节点
+
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        }
+        //打开窗口处理
+        function openwin(title) {
+
+            var he = document.body.clientHeight;
+            he = (he -50)+'px';
+            open_add = layer.open({
+                title:title,
+                type:1,
+                area: ['80%',he],
+                fixed: false, //不固定
+                content: $("#addpen"),
+                cancel: function(index, layero){
+                    cancel_()
+                }
+            });
+
+        }
+        //关闭窗口处理
+        function cancel_(){
+            layer.close(open_add);
+            $("#addform")[0].reset();
+            form.render();
+
+            $("#menlist").html("");
+        }
+
+        //工具栏事件(添加、刷新)
+        table.on('toolbar(listTable)', function(obj){
+
+            var checkStatus = table.checkStatus(obj.config.id);
+
+            switch(obj.event){
+                case 'addfun':
+                    add_or_edit = true;
+
+                    openwin('添加角色');
+                    $('#addform input[name=id]').val("");
+
+                    break;
+                //自定义头工具栏右侧图标 - 提示
+                case 'refresh':
+                    //执行重载
+                    lodinlist(1,{})
+                    break;
+            };
+        });
+
+        //自定义验证规则
+        form.verify({
+            title: function(value){
+                var reg  = /^[\S]{3,20}$/;
+                if(!reg.test(value)){
+                    return '名称必须3到20位，且不能出现空格';
+                }
+            },
+            m: function (value) {
+                if(!value){
+                    return '模型不能为空';
+                }else {
+                    var reg  = /^[\S]{3,20}$/;
+                    if(!reg.test(value)){
+                        return '模型必须3到20位，且不能出现空格';
+                    }
+                }
+            },
+            pid: function(value){
+                if(!value){
+                    return '所属不能为空';
+                }
+            }
+        });
+
+        //监听提交、修改
+        form.on('submit(smbitform)', function(data){
+            var date = data.field;
+            date.status = date.status == undefined ? 0 : 1;
+            var checkedData = tree.getChecked('roletree'); //获取选中节点的数据
+            var role = getChildNodes(checkedData,[]);
+            date.role = role;
+            if(add_or_edit ==true){
+                insta(date)
+            }else {
+                edit(date)
+            }
+
+            return false
+        });
+        function getChildNodes(treeNode, result) {
+            for (var i in treeNode) {
+                result.push(treeNode[i].id);
+                result = getChildNodes(treeNode[i].children, result);
+            }
+            return result;
+        }
+        function listMenchecked(node) {
+            for(var i in node){
+                chdate_.push(node[i].id);
+                var children_1 = node[i].children;
+                listMenchecked(children_1)
+            }
+        }
+        function treeForeach (node) {
+            var nodes = [];
+            if (node != null) {
+                nodes.push(node);
+                var children = node.children;
+                for (var i = 0; i < children.length; i++)
+                    treeForeach(children[i]);
+            }
+            return nodes;
+        }
+        //添加方法
+        function insta(date) {
+            $.ajax({
+                url:'Role/add',
+                method:'post',
+                data:date,
+                dataType:'JSON',
+                success:function(res){
+                    //提示层
+                    if(res.code == 20000){
+                        cancel_()
+                        layer.msg(res.msg);
+                        //执行重载
+                        lodinlist(1, {});
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        }
+        //修改方法
+        function edit(date) {
+            $.ajax({
+                url:'Role/edit',
+                method:'post',
+                data:date,
+                dataType:'JSON',
+                success:function(res){
+                    //提示层
+                    if(res.code == 20000){
+                        cancel_()
+                        layer.msg(res.msg);
+                        //执行重载
+                        lodinlist(page_, {});
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        }
+
+        function dele(date,obj) {
+
+
+            $.ajax({
+                url:'Role/dele',
+                method:'post',
+                data:{id:date.id},
+                dataType:'JSON',
+                success:function(res){
+                    if(res.code == 20000){
+                        layer.msg(res.msg);
+
+                        //执行重载
+                        lodinlist( page_, {});
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        }
+
+    })
+
+
+</script>
+
+</body>
+</html>

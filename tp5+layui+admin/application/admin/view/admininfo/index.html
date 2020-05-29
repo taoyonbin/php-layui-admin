@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>管理员信息</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    {include file="common/css" /}
+    <style>
+        .layui-upload-img{
+            width: 100px;
+            height: 100px;
+            border-radius: 100%;
+        }
+    </style>
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body >
+<?php
+
+$imgsrc = config('IMG_IP');
+
+?>
+<!--添加-->
+<div id="addpen" class="" style="padding:20px;display: block;">
+    <form class="layui-form" action="" lay-filter="example" id="addform">
+        <input type="hidden" name="id" value="{$data.id}" lay-verify="id">
+        <input type="hidden" name="role_id" value="{$data.role_id}" lay-verify="role_id">
+        <div class="layui-form-item">
+            <label class="layui-form-label"></label>
+            <input type="hidden" name="logo" value="{$data.logo}">
+            <div class="layui-input-block">
+                <div class="layui-upload">
+                    <button type="button" class="layui-btn" id="test1">上传头像</button>
+                    <div class="layui-upload-list">
+                        <img class="layui-upload-img" src="<?php echo $imgsrc; ?>{$data.logo}" id="demo1">
+                        <p id="demoText"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户名</label>
+            <div class="layui-input-block">
+                <input type="text" name="username" disabled id="dateusername"  lay-verify="username" value="{$data.username}" autocomplete="off" placeholder="请输入用户名" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">设置密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="password" lay-verify="password" placeholder="请设置登录密码" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">确认密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="password2" lay-verify="password2" placeholder="请在次输入密码" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">姓名</label>
+                <div class="layui-input-inline">
+                    <input type="tel" name="title" lay-verify="title"  value="{$data.title}" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">手机号</label>
+                <div class="layui-input-inline">
+                    <input type="tel" name="phone"  lay-verify="required|phone" value="{$data.phone}" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit lay-filter="smbitform">修改</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!--搜索工具-->
+
+
+{include file="common/js" /}
+
+<script>
+    //Demo
+    layui.use(['form','upload'], function(){
+        var form = layui.form,upload = layui.upload;
+        //普通图片上传
+        var uploadInst = upload.render({
+            elem: '#test1'
+            ,url: 'uploadImg' //改成您自己的上传接口
+            ,before: function(obj){
+//
+//                //预读本地文件示例，不支持ie8
+//                obj.preview(function(index, file, result){
+//                    $('#demo1').attr('src', result); //图片链接（base64）
+//                });
+
+            }
+            ,done: function(res){
+                layer.msg(res.msg);
+                if(res.code == 20000){
+                    console.log(res.data.url)
+//                    http://localhost:8001/uploads/admin/20200527\198dae0af024316a3f1db775219cb0c6.jpg
+//                    http://localhost:8001/uploads/admin/20200503\842702ed55fe13227ed53c675725f2ba.jpg
+                    $('#demo1').attr('src', '<?php echo $imgsrc; ?>'+res.data.url); //图片链接（base64）
+                    $("input[name=logo]").val(res.data.url)
+                }
+            }
+            ,error: function(){
+                //演示失败状态，并实现重传
+                var demoText = $('#demoText');
+                demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                demoText.find('.demo-reload').on('click', function(){
+                    uploadInst.upload();
+                });
+            }
+        });
+        //自定义验证规则
+        form.verify({
+            title: function(value){
+                if(value.length < 3){
+                    return '姓名至少得3个字符啊';
+                }
+            },
+            password: function (value) {
+                if(value){
+                    var reg  = /^[\S]{6,12}$/;
+                    if(!reg.test(value)){
+                        return '密码必须6到12位，且不能出现空格';
+                    }
+                }
+            },
+            password2: function(value){
+                if(value){
+                    if($('input[name=password]').val() !== value)
+                        return '两次密码输入不一致！';
+                }
+            },
+            username: function(value){
+                if(value.length < 3){
+                    return '用户名最少3个字符';
+                }
+            }
+        });
+
+        //监听提交
+        form.on('submit(smbitform)', function(data){
+            var date = data.field;
+            if(date.password || date.password2){
+                date.password = $.md5(date.password);
+                date.password2 = $.md5(date.password2);
+            }
+            $.ajax({
+                url:'edit',
+                method:'post',
+                data:date,
+                dataType:'JSON',
+                success:function(res){
+                    //提示层
+                    if(res.code == 20000){
+
+                        layer.msg(res.msg);
+                        form.render();
+                        $('input[type="password"]').val("");
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

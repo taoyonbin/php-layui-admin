@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    {include file="common/css" /}
+    <style>
+        .first-tab i.layui-tab-close{
+            display:none!important;
+        }
+    </style>
+</head>
+<body class="layui-layout-body" onload='init()'>
+<?php
+
+$imgsrc = config('IMG_IP');
+?>
+<div class="layui-layout layui-layout-admin ">
+    <div class="layui-header">
+        <div class="layui-logo menu-act" style="width: auto;padding-left: 20px;font-size: 25px;">
+            <!--<i  class="layui-icon menu-act layui-icon-app" style="color: #fff"></i>-->
+
+            <?php
+            echo config('web_title');
+            ?>
+
+        </div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="<?php echo $imgsrc; ?>{$data.logo}" class="layui-nav-img">
+                    {$data.username}
+                </a>
+
+                <dl class="layui-nav-child">
+                    <dd>
+                        <a href="javascript:;" class="nav-active" data-id="admininfo" data-url="admin/Admininfo/index"  data-title="基本资料"><i class="layui-icon layui-icon-username"></i> <span>基本资料</span></a>
+                    </dd>
+                    <dd><a href="javascript:;" class="loginout" data-id="{$data.id}">退出登录</a></dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+    <style>
+
+
+    </style>
+    <div class="layui-side layui-bg-black">
+
+        <div class="layui-side-scroll" class="rolemenu" >
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree" lay-filter="leftmenu" id="menu">
+            </ul>
+
+        </div>
+    </div>
+
+    <div class="layui-body tyb-body" style="bottom: 0px;background: #393d49">
+        {include file="common/top" /}
+        <!--<iframe class="myiframe" height="100%" width="100%"  src="admin/admin" ></iframe>-->
+    </div>
+
+    <!--<div class="layui-footer">-->
+        <!--&lt;!&ndash; 底部固定区域 &ndash;&gt;-->
+        <!--© layui.com - 底部固定区域-->
+    <!--</div>-->
+
+</div>
+{include file="common/js" /}
+
+<script>
+
+
+    layui.use(['element','layer'], function(){
+        var element = layui.element,
+            layer = layui.layer;
+//        顶部导航切换
+
+        var layid = location.hash.replace(/^#toptab=/, '');
+        element.tabChange('toptab', layid); //假设当前地址为：http://a.com#test1=222，那么选项卡会自动切换到“发送消息”这一项
+        element.on('tab(toptab)', function(){
+            location.hash = 'toptab='+ this.getAttribute('lay-id');
+        });
+
+
+        function menu_apd(ch,p) {
+
+            var html = "";
+            var p = 20+p;
+            for(var i in ch){
+                if(ch[i].children){
+                     html+='<li class="layui-nav-item layui-nav-itemed">' +
+                         '<a href="javascript:;" style="padding-left: '+p+'px"><i class="iconfont '+ch[i].icon+'"> </i> '+ch[i].title+'</a>' +
+                         '<dl class="layui-nav-child">' ;
+                             if( ch[i].children){
+                                 html+=dlfor(ch[i].children,p);
+                             }
+                    html+='</dl>'+
+                    '</li>'
+                }else {
+                    html+='<li class="layui-nav-item"><a class="nav-active" href="javascript:;" data-id="'+ch[i].c+'" data-url="'+ch[i].m+'/'+ch[i].c+'" data-title="'+ch[i].title+'"><i class="iconfont '+ch[i].icon+'"> </i> '+ch[i].title+'</a></li>'
+                }
+            }
+            return html
+        }
+
+        function dlfor(list,p){
+            var p = p+10;
+            var dd = "";
+
+            for(var k in list){
+                dd+='<dd>' ;
+
+                if(list[k].children){
+                    dd+='<a href="javascript:;" style="padding-left:'+p+'px "><i class="iconfont '+list[k].icon+'"> </i>  '+list[k].title+'</a>' +
+                        '<dl class="layui-nav-child">' ;
+
+                    dd+=dlfor(list[k].children,p);
+                    dd+='</dl>';
+                }else{
+                    dd+='<a href="javascript:;" class="nav-active" style="padding-left:'+p+'px  " data-id="'+list[k].c+'" data-url="'+list[k].m+'/'+list[k].c+'" data-title="'+list[k].title+'"><i class="iconfont '+list[k].icon+'"> </i> '+list[k].title+'</a>';
+                }
+                dd+="</dd>";
+            }
+            return dd;
+        }
+        $('body').on('click','.nav-active', function () {
+
+            var dataid = $(this);
+
+            //这时会判断右侧.layui-tab-title属性下的有lay-id属性的li的数目，即已经打开的tab项数目
+            if ($(".layui-tab-title li[lay-id]").length <= 0) {
+                //如果比零小，则直接打开新的tab项
+                active.tabAdd(dataid.attr("data-url"), dataid.attr("data-id"),dataid.attr("data-title"));
+            } else {
+                //否则判断该tab项是否以及存在
+
+                var isData = false; //初始化一个标志，为false说明未打开该tab项 为true则说明已有
+                $.each($(".layui-tab-title li[lay-id]"), function () {
+                    //如果点击左侧菜单栏所传入的id 在右侧tab项中的lay-id属性可以找到，则说明该tab项已经打开
+                    if ($(this).attr("lay-id") == dataid.attr("data-id")) {
+                        isData = true;
+                    }
+                })
+                if (isData == false) {
+                    //标志为false 新增一个tab项
+                    active.tabAdd(dataid.attr("data-url"), dataid.attr("data-id"),dataid.attr("data-title"));
+                }
+            }
+            //最后不管是否新增tab，最后都转到要打开的选项页面上
+            active.tabChange(dataid.attr("data-id"));
+        })
+
+        var active = {
+            //在这里给active绑定几项事件，后面可通过active调用这些事件
+            tabAdd: function(url,id,name) {
+                var heit = ($('.layui-body').height()-65)+"px";
+
+                //新增一个Tab项 传入三个参数，分别对应其标题，tab页面的地址，还有一个规定的id，是标签中data-id的属性值
+                //关于tabAdd的方法所传入的参数可看layui的开发文档中基础方法部分
+                element.tabAdd('toptab', {
+                    title: name,
+                    content: '<iframe class="myiframe"  data-frameid="'+id+'" scrolling="yes"  frameborder="0" src="'+url+'" height="'+heit+'" style="width:100%;margin: 0;padding: 0px 0px 0px 0px" ></iframe>',
+                    id: id //规定好的id
+                })
+//                function emm() { this.height = document.getElementsByClassName("tyb-body")[0].clientHeight-64 }
+                element.render('tab');
+
+            },
+            tabChange: function(id) {
+                //切换到指定Tab项
+                element.tabChange('toptab', id); //根据传入的id传入到指定的tab项
+            },
+            tabDelete: function (id) {
+                element.tabDelete("toptab", id);//删除
+            }
+        };
+        getrolemenu()
+       function getrolemenu() {
+           $.ajax({
+               url:'admin/index/getRoleMenu',
+               method:'post',
+               data:{},
+               dataType:'JSON',
+               success:function(res){
+                   //提示层
+                   $("#menu").append(menu_apd(res,0));
+                   element.render()
+               },
+               error:function (data) {
+
+               }
+           }) ;
+       }
+
+        var kks = 1;
+        $('.menu-act').on('click',function () {
+            if(kks%2 == 0){
+
+//                $(".layui-layout-admin .layui-side").animate({width:"200px"},500);
+//                $(".tyb-body").animate({left:"200px"},500);
+//                $(".layui-side-scroll .layui-nav .layui-nav-item a").css({padding:"0px 20px"});
+
+//                $(".layui-side-scroll .layui-nav .layui-nav-item  span").css({display: "contents"});
+//                $(".layui-side-scroll .layui-nav i").css({fontSize:"14px"});
+
+//                $(".layui-side-scroll .layui-nav i").animate({fontSize:"14px"});
+            }else{
+//                $(".layui-layout-admin .layui-side").animate({width:"40px"},500);
+//                $(".tyb-body").animate({left:"40px"},500);
+//                $(".layui-side-scroll .layui-nav .layui-nav-item a").css({padding:"0px 10px"});
+
+//                $(".layui-side-scroll .layui-nav .layui-nav-item  span").css({display: "none"});
+//                $(".layui-side-scroll .layui-nav i").css({fontSize:"23px"});
+
+//                $(".layui-side-scroll .layui-nav i").animate({fontSize:"18px"});/
+            }
+
+            kks++;
+
+        })
+
+        $('body').on('click','.loginout', function () {
+
+            $.ajax({
+                url:'admin/Index/logout',
+                method:'post',
+                data:{},
+                dataType:'JSON',
+                success:function(res){
+                    //提示层
+                    layer.msg(res.msg);
+                    if(res.code == 20000){
+                        window.location.href = "admin/login/index";
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        });
+
+//        FrameWH();
+//        function FrameWH() {
+//            var h = $('.layui-body').height()-64;
+//            $("iframe").css("height",h+"px");
+//        }
+//        $(window).resize(function () {
+//            FrameWH();
+//        });
+
+
+    });
+
+
+    function init() {
+
+        var h = $('.layui-body').height()-56;
+//        console.log(h)
+        $("iframe").css("height",h+"px");
+    }
+
+</script>
+</body>
+</html>

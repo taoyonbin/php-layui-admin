@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    {include file="common/css" /}
+    <style>
+        /*.layui-form-pane .layui-form-label{*/
+        /*width: auto;*/
+        /*}*/
+        /*.layui-form-item .layui-input-inline{*/
+        /*width: 100px;*/
+
+        /*}*/
+        .layui-table, .layui-table-view{
+
+        }
+        .layui-col-sm3{
+            text-align: right;
+        }
+    </style>
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body >
+<div class="">
+    <div style="padding:15px;text-align: right">
+        <button type="button" data-type="addopen" data-id="0"  class="layui-btn layui-btn-sm "  >添加</button>
+
+    </div>
+    <div id="menlists">
+
+    </div>
+
+    <!--添加-->
+    <div id="addpen" class="" style="padding:20px;display: none;">
+        <form class="layui-form" action="" lay-filter="example" id="addform">
+            <input type="hidden" name="id" lay-verify="id">
+            <!--<input type="hidden" name="pid"  lay-verify="pid">-->
+            <div class="layui-form-item">
+                <label class="layui-form-label">所属</label>
+                <div class="layui-input-block">
+                    <select name="pid" required id="menlist" lay-verify="pid" lay-search="">
+
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">菜单名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="title"  required   lay-verify="title" autocomplete="off" placeholder="模块" class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">模块</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="m"  required   lay-verify="m" autocomplete="off" placeholder="模块" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">控制器</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="c"  lay-verify="c" placeholder="控制器" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">方法</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="f"  lay-verify="f" placeholder="操作方法" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">类型</label>
+                    <div class="layui-input-block">
+                        <input type="checkbox" checked="" name="type" lay-skin="switch" lay-filter="type" lay-text="菜单|方法">
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">排序</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="sort"  lay-verify="sort" placeholder="排序" value="99" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">图标</label>
+                <div class="layui-input-block">
+                    <input type="text" name="icon"  lay-verify="icon"  placeholder="图标" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="submit" class="layui-btn" lay-submit="" lay-filter="smbitform">确定</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{include file="common/js" /}
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+    var open_add = "";
+    var add_or_edit = true;
+    var page_ = 1;
+
+    layui.use(['table','form', 'layedit', 'laydate','laypage','element'], function(){
+        var form = layui.form,
+            layer = layui.layer ,
+            layedit = layui.layedit ,
+            laydate = layui.laydate;
+        laypage = layui.laypage;
+        var element = layui.element;
+
+
+        var counts_ = 0;
+        var data_ = [];
+
+        var $ = layui.$, active = {
+            reload: function(){
+                //执行重载
+
+            },
+            addopen:function () {
+                var dataid = $(this);
+                var pid = dataid.attr("data-id");
+                add_or_edit = true;
+                openwin("添加菜单",{id:null,pid:pid});
+//                console.log(pid)
+            },
+            icon:function () {
+
+            },
+            editopen:function () {
+                var dataid = $(this);
+                add_or_edit = false;
+                $.ajax({
+                    url:'menu/getinfo',
+                    method:'get',
+                    data:{id:dataid.attr("data-id")},
+                    dataType:'JSON',
+                    success:function(res){
+                        //提示层
+                        if(res.code == 20000){
+                            form.val('example', res.data);
+                            openwin('修改',res.data);
+
+
+                        }else{
+                            layer.msg(res.msg,{icon: 2});
+                        }
+                    },
+                    error:function (data) {
+
+                    }
+                }) ;
+            },
+            deleopen:function () {
+                var dataid = $(this);
+                dele(dataid.attr("data-id"))
+            }
+        };
+//        //开启节点操作图标
+
+
+        tmenlist()
+        function tmenlist() {
+            $("#menlists").html("");
+            $.ajax({
+                url:'menu/getMenu',
+                method:'get',
+                data:{},
+                async: false,
+                dataType:'JSON',
+                success:function(res){
+                    //提示层
+                    if(res.code == 20000){
+                        var menlist = res.data;
+                        $("#menlists").append(apend("#menlists",menlist,10));
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+
+
+        }
+
+        function apend(idname,list,pleft) {
+            var pleft = pleft;
+            var html = "";
+            for(var i in list){
+                html += '<div class="layui-fluid">';
+                    html += '<div class="layui-row" style="padding: 0px">';
+
+                        html += '<div class="layui-col-sm4">';
+                            html += '<i class="iconfont '+list[i].icon+'" style="margin-right: 10px;margin-left: '+pleft+'px;"></i>';
+                            html += '<span>'+list[i].title+'</span>';
+                        html+='</div>';
+
+                        html += '<div class="layui-col-sm5">';
+                            html += '<div style="padding:0px 20px;">';
+                                html += '模块：<span style="padding-right: 30px">'+list[i].m+'</span>';
+                                html += '控制器：<span style="padding-right: 30px">'+list[i].c+'</span>';
+                                html += '方法：<span>'+list[i].f+'</span>';
+                            html+='</div>';
+                        html+='</div>';
+
+                        html += '<div class="layui-col-sm3">';
+                        if(list[i].type == 1){
+                            html +='<button type="button" data-type="addopen" data-id="'+list[i].id+'"  class="layui-btn layui-btn-xs "  >添加</button>';
+                        }else{
+                            html +='<button type="button" class="layui-btn layui-btn-xs layui-btn-disabled"  >添加</button>';
+                        }
+                        html+='<button type="button" data-type="editopen"  data-id="'+list[i].id+'"  class="layui-btn layui-btn-xs layui-btn-warm">修改</button>';
+                        if(list[i].children){
+                            html +='<button type="button" class="layui-btn layui-btn-xs layui-btn-disabled"  >删除</button>';
+
+                        }else{
+                            html +='<button type="button" data-type="deleopen"  data-id="'+list[i].id+'"  class="layui-btn layui-btn-xs layui-btn-danger">删除</button>';
+                        }
+
+                        html+='</div>';
+
+                    html+='</div>';
+                html+='</div>';
+                html+='<hr class="layui-bg-gray">';
+                html+='<div id="li_'+list[i].id+'" >';
+                var children = list[i].children;
+                if(children !== undefined){
+                    html+= apend("li_"+list[i].id,children,pleft+20);
+                }
+                html+='</div>';
+            }
+            return html
+        }
+
+
+
+
+
+        //数据加载处理
+        function getYmenu(id,pid) {
+            $.ajax({
+                url:'menu/getAllmenu',
+                method:'get',
+                data:{},
+                async: false,
+                dataType:'JSON',
+                success:function(res){
+                    //提示层
+                    if(res.code == 20000){
+                        var menlist = res.data;
+                        for(var i in menlist){
+                            if(menlist[i].type == 1){
+
+                                if(menlist[i].id == pid){
+                                    $("#menlist").append(' <option selected="true" value="'+menlist[i].id+'">'+menlist[i].title+'</option>')
+
+                                }else{
+                                    if(id==menlist[i].id){
+                                        $("#menlist").append(' <option disabled="" value="'+menlist[i].id+'">'+menlist[i].title+'</option>')
+
+                                    }else{
+                                        $("#menlist").append(' <option value="'+menlist[i].id+'">'+menlist[i].title+'</option>')
+                                    }
+
+
+                                }
+                            }
+                        }
+
+
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        }
+
+//        $(' .layui-btn').on('click', function(){
+//            var type = $(this).data('type');
+//            active[type] ? active[type].call(this) : '';
+//        });
+//动态加载元素用
+        $('body').on('click','.layui-btn', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+
+        //修改事件处理
+        function editget(data) {
+            add_or_edit = false;
+            $.ajax({
+                url:'menu/getinfo',
+                method:'get',
+                data:{id:data.id},
+                dataType:'JSON',
+                success:function(res){
+                    //提示层
+                    if(res.code == 20000){
+                        form.val('example', res.data);
+                        openwin('修改',res.data);
+                        $('#addform input[name=id]').val(res.data.id);
+
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        }
+        //打开窗口处理
+        function openwin(title,data) {
+            $('#addform input[name=pid]').val(data.pid);
+            $('#addform input[name=id]').val(data.id);
+
+            getYmenu(data.id,data.pid);
+            form.render('select');
+
+            open_add = layer.open({
+                title:title,
+                type:1,
+                area: ['80%'],
+                fixed: true, //不固定
+                content: $("#addpen"),
+                cancel: function(index, layero){
+                    cancel_()
+                }
+            });
+
+        }
+        //关闭窗口处理
+        function cancel_(){
+            layer.close(open_add);
+            $("#addform")[0].reset();
+            form.render();
+            $('#addform input[name=pid]').val(0);
+            $('#addform input[name=id]').val('');
+            $("#menlist").html("");
+        }
+
+
+
+        //自定义验证规则
+        form.verify({
+            title: function(value){
+                var reg  = /^[\S]{3,20}$/;
+                if(!reg.test(value)){
+                    return '名称必须3到20位，且不能出现空格';
+                }
+            },
+            m: function (value) {
+                if(!value){
+                    return '模型不能为空';
+                }else {
+                    var reg  = /^[\S]{3,20}$/;
+                    if(!reg.test(value)){
+                        return '模型必须3到20位，且不能出现空格';
+                    }
+                }
+            },
+            pid: function(value){
+                if(!value){
+                    return '所属不能为空';
+                }
+            }
+        });
+
+        //监听提交、修改
+        form.on('submit(smbitform)', function(data){
+            var date = data.field;
+            date.type = date.type == undefined ? 0 : 1;
+            if(add_or_edit == true){
+                insta(date)
+            }else {
+                edit(date)
+            }
+
+            return false
+        });
+        //添加方法
+        function insta(date) {
+            $.ajax({
+                url:'menu/add',
+                method:'post',
+                data:date,
+                dataType:'JSON',
+                success:function(res){
+                    //提示层
+                    if(res.code == 20000){
+                        cancel_()
+                        layer.msg(res.msg);
+                        //执行重载
+                        tmenlist()
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        }
+        //修改方法
+        function edit(date) {
+            $.ajax({
+                url:'menu/edit',
+                method:'post',
+                data:date,
+                dataType:'JSON',
+                success:function(res){
+                    //提示层
+                    if(res.code == 20000){
+                        cancel_()
+                        layer.msg(res.msg);
+                        //执行重载
+                        tmenlist()
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        }
+
+        function dele(id) {
+
+
+            $.ajax({
+                url:'menu/dele',
+                method:'post',
+                data:{id:id},
+                dataType:'JSON',
+                success:function(res){
+                    if(res.code == 20000){
+                        layer.msg(res.msg);
+                        tmenlist()
+                    }else{
+                        layer.msg(res.msg,{icon: 2});
+                    }
+                },
+                error:function (data) {
+
+                }
+            }) ;
+        }
+
+    })
+</script>
+
+</body>
+</html>
